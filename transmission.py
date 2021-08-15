@@ -8,9 +8,9 @@ from sqlalchemy.orm import sessionmaker
 from model import core_admission
 
 CHUNK_SIZE = 4000
-# DB_URL= 
+DB_URL = "postgresql://postgres:1030@localhost/mimic"
 
-# engine = create_engine(DB_URL)
+engine = create_engine(DB_URL)
 session = sessionmaker(bind = engine)()
 
 def get_chunk(df, n):
@@ -60,10 +60,11 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
         sys.exit("reading failes")
-    print(df.head(10))
-    print(df.shape)
-    print(list(df.columns.values))
-    print(dict(df.dtypes))
+    # print(df.head(10))
+    # print(df.shape)
+    # print(list(df.columns.values))
+    # print(dict(df.dtypes))
+
     num_inserted = batch_insert(df, CHUNK_SIZE, session)
     assert(
         num_inserted == len(df)

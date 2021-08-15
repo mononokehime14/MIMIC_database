@@ -11,7 +11,7 @@ class core_admission(Base):
     __tablename__ = 'core_admission'
     ROW_ID = Column(Integer)
     SUBJECT_ID = Column(Integer)
-    HADM_ID = Column(Integer)
+    HADM_ID = Column(Integer, primary_key=True, index=True)
     ADMITTIME = Column(String)
     DISCHTIME = Column(String)
     DEATHTIME = Column(String)
