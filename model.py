@@ -61,10 +61,32 @@ class core_transfers(Base):
     eventtype = Column(String)
     careunit = Column(String)
     intime = Column(DateTime(timezone=False), nullable = False)
-    outtime = Column(DateTime(timezone=False))
+    outtime = Column(String)
 
     def __repr__(self):
         return "<core_patients(subject_id='{}', transfer_id='{}'>".format(self.subject_id, self.transfer_id)
+
+    def to_dict(self):
+        d = {}
+        for column in self.__table__.columns:
+            d[column.name] = getattr(self, column.name)
+        return d
+
+class icu_chartevents(Base):
+    __tablename__ = 'icu_chartevents'
+    subject_id = Column(Integer)
+    hadm_id = Column(Integer)
+    stay_id = Column(Integer)
+    charttime = Column(String)
+    storetime = Column(String)
+    itemid = Column(Integer, primary_key = True)
+    value = Column(Float) 
+    valuenum = Column(Float)
+    valueuom = Column(String) 
+    warning = Column(Integer)
+
+    def __repr__(self):
+        return "<core_patients(subject_id='{}', charttime='{}'>".format(self.subject_id, self.charttime)
 
     def to_dict(self):
         d = {}

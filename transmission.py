@@ -9,7 +9,7 @@ from model import core_admission
 from model import core_patients
 from model import core_transfers
 
-CHUNK_SIZE = 4000
+CHUNK_SIZE = 5000
 DB_URL = "postgresql://postgres:1030@localhost/mimic"
 
 engine = create_engine(DB_URL)
@@ -58,19 +58,19 @@ if __name__ == '__main__':
     #     relation_name = sys.argv[2]
 
     try:
-        df = pd.read_csv(
-            input_file_path,
-            compression = 'gzip',
-        )
-        assert(
-            len(df.columns) == len(relation.__table__.columns.keys())
-        )
+        chunks_list = []
+        for chunk in pd.read_csv(input_file_path, sep=',', chunksize = CHUNK_SIZE, low_memory=False):
+            chunks_list.append(chunk)
+            del chunk
+        df = pd.concat(chunks_list)
+        # assert(
+        #     len(df.columns) == len(relation.__table__.columns.keys())
+        # )
     except Exception as e:
         print(e)
         sys.exit("reading failes")
-        
-    # print(df['admittime'].dtypes)
-    # print(df['dischtime'].dtypes)
+    print("reading over")
+
     # print(df.head(10))
     # print(df.shape)
     # print(list(df.columns.values))
