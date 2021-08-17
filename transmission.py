@@ -6,12 +6,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from model import core_admission
+from model import core_patients
+from model import core_transfers
 
 CHUNK_SIZE = 4000
 DB_URL = "postgresql://postgres:1030@localhost/mimic"
 
 engine = create_engine(DB_URL)
 session = sessionmaker(bind = engine)()
+
+relation = core_transfers
 
 def get_chunk(df, n):
     if n < 1:
@@ -27,7 +31,7 @@ def batch_insert(df, chunk_size, session):
     for chunk in get_chunk(df, chunk_size):
         try:
             session.bulk_save_objects(
-                    [ core_admission(**d.to_dict()) for r, d in chunk.iterrows() ]
+                    [ relation(**d.to_dict()) for r, d in chunk.iterrows() ]
                 )
             session.commit()
             num_inserted += len(chunk)
@@ -39,7 +43,7 @@ def batch_insert(df, chunk_size, session):
             session.close()
 
         ind += 1
-
+    print("chunk:{} finished".format(ind))
     return num_inserted
 
 if __name__ == '__main__':
@@ -48,22 +52,30 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         input_file_path = sys.argv[1]
-    
+    # if len(sys.argv) < 3:
+    #     print("You need to specify relation's name")
+    # else:
+    #     relation_name = sys.argv[2]
+
     try:
         df = pd.read_csv(
             input_file_path,
             compression = 'gzip',
         )
         assert(
-            len(df) == len(core_admission.__table__.columns.keys())
+            len(df.columns) == len(relation.__table__.columns.keys())
         )
     except Exception as e:
         print(e)
         sys.exit("reading failes")
+        
+    # print(df['admittime'].dtypes)
+    # print(df['dischtime'].dtypes)
     # print(df.head(10))
     # print(df.shape)
     # print(list(df.columns.values))
     # print(dict(df.dtypes))
+    # sys.exit("util here is ok")
 
     num_inserted = batch_insert(df, CHUNK_SIZE, session)
     assert(
